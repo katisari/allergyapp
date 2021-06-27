@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 void main() {
   runApp(MyApp());
@@ -9,7 +10,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Allergy App',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -22,9 +23,19 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Allergy App'),
     );
   }
+}
+
+class Allergen {
+  final int id;
+  final String name;
+
+  Allergen({
+    required this.id,
+    required this.name,
+  });
 }
 
 class MyHomePage extends StatefulWidget {
@@ -46,7 +57,19 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  String _fullname = 'Jaewon Lee';
+  static List<Allergen> _animals = [
+    Allergen(id: 1, name: "Milk"),
+    Allergen(id: 2, name: "Peanut"),
+    Allergen(id: 3, name: "Egg"),
+    Allergen(id: 4, name: "Soy"),
+    Allergen(id: 5, name: "Wheat"),
+  ];
+  final _items = _animals
+      .map((animal) => MultiSelectItem<Allergen>(animal, animal.name))
+      .toList();
+  List<Allergen> _selectedAnimals = [];
+  final _multiSelectKey = GlobalKey<FormFieldState>();
 
   void _incrementCounter() {
     setState(() {
@@ -55,9 +78,14 @@ class _MyHomePageState extends State<MyHomePage> {
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
-      _counter++;
     });
   }
+
+  // @override
+  // void initState() {
+  //   _selectedAnimals5 = _animals;
+  //   super.initState();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -93,12 +121,53 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+            Icon(
+              Icons.account_circle_rounded,
+              color: Colors.blue,
+              size: 100.0,
             ),
             Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+              _fullname,
+            ),
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withOpacity(.4),
+                border: Border.all(
+                  color: Theme.of(context).primaryColor,
+                  width: 2,
+                ),
+              ),
+              child: Column(
+                children: <Widget>[
+                  MultiSelectBottomSheetField(
+                    initialChildSize: 0.4,
+                    listType: MultiSelectListType.CHIP,
+                    searchable: true,
+                    buttonText: Text("My Allergens"),
+                    title: Text("Allergens"),
+                    items: _items,
+                    onConfirm: (values) {
+                      _selectedAnimals = values.cast<Allergen>();
+                    },
+                    chipDisplay: MultiSelectChipDisplay(
+                      onTap: (value) {
+                        setState(() {
+                          _selectedAnimals.remove(value);
+                        });
+                      },
+                    ),
+                  ),
+                  _selectedAnimals == null || _selectedAnimals.isEmpty
+                      ? Container(
+                          padding: EdgeInsets.all(10),
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "None selected",
+                            style: TextStyle(color: Colors.black54),
+                          ))
+                      : Container(),
+                ],
+              ),
             ),
           ],
         ),
